@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografía: El Ciclo del Plástico en Perú</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .kpi-value {
+            font-weight: 900;
+            font-size: 3.5rem;
+            line-height: 1;
+            color: #CC333F;
+        }
+        .kpi-label {
+            font-weight: 700;
+            font-size: 1.125rem;
+            color: #6A4A3C;
+        }
+        .flowchart-step {
+            background-color: white;
+            border: 2px solid #00A0B0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            flex-grow: 1;
+        }
+        .flowchart-arrow {
+            font-size: 2rem;
+            color: #00A0B0;
+            align-self: center;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #00A0B0;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- PALETTE: Energetic & Playful (#00A0B0, #6A4A3C, #CC333F, #EB6841, #EDC951) -->
+    <!-- NARRATIVE PLAN: 
+        1. Hook: Title and key shocking stats.
+        2. Data Overview: Generation and consumption figures.
+        3. The Recycling Paradox: Contrast potential vs. reality.
+        4. Ecosystem Impact: Show effects on wildlife.
+        5. Single-Use Crisis: Highlight bag consumption and technopor issue.
+        6. Value Chain: Visualize the recycling process and its flaws.
+        7. Future Outlook: Present the goals of the Circular Economy Roadmap.
+        8. NEW FEATURE: Interactive LLM-powered plastic information.
+    -->
+    <!-- VISUALIZATION CHOICES:
+        - Generación Anual: Big Number. Goal: Inform. Method: Styled HTML. NO SVG.
+        - Consumo Per Cápita: Big Number. Goal: Inform. Method: Styled HTML. NO SVG.
+        - Potencial vs. Tasa Real de Reciclaje: Donut Chart. Goal: Compare. Justification: Shows the huge gap effectively. Library: Chart.js. NO SVG.
+        - Generación Lima vs. Resto: Pie Chart. Goal: Compare. Justification: Simple proportion. Library: Chart.js. NO SVG.
+        - Destino Residuos PET: Stacked Bar Chart. Goal: Compare/Composition. Justification: Shows breakdown of PET fate. Library: Chart.js. NO SVG.
+        - Cadena de Valor: Flowchart. Goal: Organize. Justification: Shows process flow. Method: Styled HTML/CSS. NO SVG, NO MERMAID JS.
+    -->
+    <!-- CONFIRMATION: NEITHER MERMAID JS NOR SVG were used in this output. -->
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-black text-[#6A4A3C] mb-2">EL CICLO DEL PLÁSTICO EN PERÚ</h1>
+            <p class="text-lg md:text-xl text-[#CC333F] font-bold">Una crisis silenciosa con un potencial desaprovechado</p>
+        </header>
+
+        <main>
+            <section id="overview" class="mb-16">
+                <h2 class="text-3xl font-bold text-center text-[#00A0B0] mb-8">La Magnitud del Problema en Cifras</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <p class="kpi-value">1.2 M</p>
+                        <p class="kpi-label">de toneladas de plástico generadas anualmente</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <p class="kpi-value">30 kg</p>
+                        <p class="kpi-label">de plástico consumidos por persona al año</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <p class="kpi-value">886</p>
+                        <p class="kpi-label">toneladas diarias generadas solo en Lima y Callao</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="recycling-paradox" class="mb-16">
+                <div class="bg-white p-6 md:p-8 rounded-lg shadow-xl">
+                    <h2 class="text-3xl font-bold text-center text-[#00A0B0] mb-4">La Paradoja del Reciclaje en Perú</h2>
+                    <p class="text-center max-w-3xl mx-auto mb-8 text-gray-600">
+                        Perú tiene un enorme potencial para recuperar sus residuos, pero la realidad es alarmantemente diferente. La brecha entre lo que se podría reciclar y lo que efectivamente se recicla revela fallas estructurales en el sistema de gestión, no una falta de material.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div class="chart-container">
+                            <canvas id="recyclingRateChart"></canvas>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-[#6A4A3C] mb-4">Potencial vs. Realidad</h3>
+                            <p class="text-lg mb-2"><strong class="text-[#EB6841] text-4xl font-black">78%</strong> es el potencial de recuperación de residuos sólidos en el país.</p>
+                            <p class="text-lg"><strong class="text-[#CC333F] text-4xl font-black">~10%</strong> es la tasa real de reciclaje para los residuos plásticos.</p>
+                            <p class="mt-4 text-gray-500">Esta desconexión masiva se debe a una limitada cultura de segregación, infraestructura deficiente y la alta informalidad del sector.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="impact" class="mb-16">
+                 <h2 class="text-3xl font-bold text-center text-[#00A0B0] mb-8">Impacto Devastador en los Ecosistemas</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-xl font-bold text-[#6A4A3C] mb-4 text-center">Concentración de la Generación</h3>
+                         <p class="text-center text-sm text-gray-500 mb-4">Lima y Callao son el epicentro de la generación de residuos plásticos, lo que ejerce una presión inmensa sobre los ecosistemas costeros cercanos.</p>
+                        <div class="chart-container h-64 md:h-80">
+                            <canvas id="generationSourceChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-xl font-bold text-[#6A4A3C] mb-4 text-center">El Destino del PET</h3>
+                        <p class="text-center text-sm text-gray-500 mb-4">Incluso para el PET, el plástico más reciclable, la mayor parte se pierde. Solo una pequeña fracción vuelve a convertirse en envases de alto valor.</p>
+                        <div class="chart-container h-64 md:h-80">
+                            <canvas id="petFateChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
+                    <h3 class="text-xl font-bold text-[#6A4A3C] mb-4 text-center">Contaminación sin Fronteras: El Cóndor Andino</h3>
+                    <p class="text-center max-w-3xl mx-auto mb-4 text-gray-600">
+                        La contaminación plástica no se limita a la costa. El cóndor andino, al alimentarse de fauna marina contaminada, transporta plásticos a los Andes, demostrando cómo el problema se infiltra en toda la cadena alimentaria y el territorio nacional.
+                    </p>
+                    <div class="text-center">
+                        <p class="text-lg mb-2">Ingesta de plástico en muestras de cóndores:</p>
+                        <p class="text-2xl font-bold"><span class="text-[#CC333F]">100%</span> en la zona marino-costera</p>
+                        <p class="text-2xl font-bold"><span class="text-[#EB6841]">85%</span> en los Andes</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="value-chain" class="mb-16">
+                <h2 class="text-3xl font-bold text-center text-[#00A0B0] mb-8">La Cadena de Valor del Reciclaje: Un Camino con Obstáculos</h2>
+                <p class="text-center max-w-3xl mx-auto mb-8 text-gray-600">
+                    El proceso para convertir residuos en recursos es complejo y está marcado por la informalidad. Desde la recolección hasta la transformación, existen cuellos de botella que limitan la eficiencia y perpetúan las malas condiciones para los recicladores.
+                </p>
+                <div class="flex flex-col md:flex-row md:items-stretch justify-center gap-4 md:gap-2">
+                    <div class="flowchart-step">
+                        <div class="text-3xl mb-2">👤</div>
+                        <h4 class="font-bold">Recicladores</h4>
+                        <p class="text-sm">Recolectan el material en condiciones de alta informalidad y sin seguridad social.</p>
+                    </div>
+                    <div class="flowchart-arrow">➔</div>
+                    <div class="flowchart-step">
+                        <div class="text-3xl mb-2">🏢</div>
+                        <h4 class="font-bold">Acopiadores</h4>
+                        <p class="text-sm">Centros que compran, clasifican y compactan el material. A menudo son el cuello de botella por falta de infraestructura.</p>
+                    </div>
+                    <div class="flowchart-arrow">➔</div>
+                    <div class="flowchart-step">
+                        <div class="text-3xl mb-2">🏭</div>
+                        <h4 class="font-bold">Empresas Transformadoras</h4>
+                        <p class="text-sm">Convierten el plástico recuperado en nueva materia prima o productos finales. La capacidad es insuficiente para el volumen generado.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="single-use" class="mb-16">
+                 <div class="bg-white p-6 md:p-8 rounded-lg shadow-xl">
+                    <h2 class="text-3xl font-bold text-center text-[#00A0B0] mb-4">La Crisis del Plástico de un Solo Uso</h2>
+                    <p class="text-center max-w-3xl mx-auto mb-8 text-gray-600">
+                        A pesar de la Ley N° 30884, el consumo de descartables sigue siendo un problema grave. La falta de fiscalización efectiva permite que productos prohibidos, como el tecnopor, sigan inundando el mercado.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div class="text-center">
+                            <p class="text-6xl font-black text-[#CC333F]">3 MIL MILLONES</p>
+                            <p class="text-xl font-bold text-[#6A4A3C]">de bolsas plásticas se consumen en Perú cada año. ¡Eso es casi 6,000 por minuto!</p>
+                        </div>
+                        <div class="text-center p-6 bg-red-100 border-l-4 border-red-500 rounded-r-lg">
+                             <h3 class="text-xl font-bold text-red-800 mb-2">Falla en la Gobernanza: El Caso del Tecnopor</h3>
+                             <p class="text-red-700">Aunque su uso para alimentos está prohibido desde 2021, se estima que <strong class="font-black">80 millones de envases de tecnopor</strong> ingresan al mercado peruano cada mes por contrabando y producción ilegal, evidenciando un fracaso en la fiscalización.</p>
+                        </div>
+                    </div>
+                 </div>
+            </section>
+            
+            <section id="future" class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-[#00A0B0] mb-4">Un Futuro Circular es Posible</h2>
+                <p class="max-w-3xl mx-auto mb-8 text-gray-600">La `Hoja de Ruta Nacional de Economía Circular al 2030` no es solo un plan ambiental, sino una estrategia de desarrollo económico que busca transformar los residuos en oportunidades, generando empleo y crecimiento sostenible.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <p class="kpi-value text-[#EB6841]">2%</p>
+                        <p class="kpi-label">de incremento adicional en el PBI, equivalente a S/14,000 millones.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <p class="kpi-value text-[#EDC951]">306,000</p>
+                        <p class="kpi-label">nuevos empleos sostenibles que se generarían.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="gemini-feature" class="mb-16">
+                <div class="bg-white p-6 md:p-8 rounded-lg shadow-xl">
+                    <h2 class="text-3xl font-bold text-center text-[#CC333F] mb-4">Generador de Información sobre Plásticos ✨</h2>
+                    <p class="text-center max-w-3xl mx-auto mb-6 text-gray-600">
+                        Escribe el nombre de un producto de plástico, como "botella de PET" o "envoltorio de snack", para obtener información detallada sobre su proceso de reciclaje y su impacto.
+                    </p>
+                    <div class="flex flex-col md:flex-row gap-4 items-center">
+                        <input id="plasticInput" type="text" placeholder="Ej: botella de PET, bolsa de plástico" class="flex-grow w-full md:w-auto p-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-[#00A0B0]">
+                        <button id="generateBtn" class="bg-[#00A0B0] text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-[#00707c] transition-colors flex items-center justify-center gap-2">
+                             Generar Información
+                        </button>
+                    </div>
+                    <div id="loading" class="mt-4 hidden justify-center items-center gap-2 text-gray-500">
+                        <div class="loading-spinner"></div>
+                        Cargando...
+                    </div>
+                    <div id="resultContainer" class="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200 hidden">
+                        <h3 class="text-2xl font-bold text-[#6A4A3C] mb-2">Información sobre <span id="plasticName" class="italic"></span></h3>
+                        <p id="resultText" class="text-gray-700 leading-relaxed"></p>
+                        <button id="ttsBtn" class="mt-4 bg-[#EDC951] text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-[#ebbb38] transition-colors" disabled>
+                             Reproducir Texto 🔊
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-16 pt-8 border-t border-gray-300">
+            <p class="text-sm text-gray-500">Infografía creada a partir del informe "El Ciclo del Plástico en Perú: Impactos, Potencial de Reciclaje y Desafíos".</p>
+        </footer>
+
+    </div>
+
+    <script>
+        const tooltipTitleCallback = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                              return label.join(' ');
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        };
+        
+        const wrapLabel = (label) => {
+            const maxLength = 16;
+            if (label.length <= maxLength) return label;
+            
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+
+            words.forEach(word => {
+                if ((currentLine + word).length > maxLength) {
+                    lines.push(currentLine.trim());
+                    currentLine = '';
+                }
+                currentLine += word + ' ';
+            });
+            lines.push(currentLine.trim());
+            return lines;
+        };
+
+        const recyclingRateCtx = document.getElementById('recyclingRateChart').getContext('2d');
+        new Chart(recyclingRateCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Potencial de Reciclaje No Realizado', 'Tasa de Reciclaje Real (Plástico)'],
+                datasets: [{
+                    data: [68, 10],
+                    backgroundColor: ['#EB6841', '#00A0B0'],
+                    borderColor: '#ffffff',
+                    borderWidth: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    ...tooltipTitleCallback.plugins,
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Potencial vs. Tasa Real de Reciclaje',
+                        font: { size: 16 }
+                    }
+                }
+            }
+        });
+
+        const generationSourceCtx = document.getElementById('generationSourceChart').getContext('2d');
+        new Chart(generationSourceCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Lima y Callao', 'Resto del País'],
+                datasets: [{
+                    data: [46, 54],
+                    backgroundColor: ['#CC333F', '#EDC951'],
+                    borderColor: '#ffffff',
+                    borderWidth: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    ...tooltipTitleCallback.plugins,
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        const petFateCtx = document.getElementById('petFateChart').getContext('2d');
+        new Chart(petFateCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Destino de Residuos PET'],
+                datasets: [
+                    {
+                        label: 'Perdido en Rellenos/Botaderos',
+                        data: [78.1],
+                        backgroundColor: '#CC333F',
+                    },
+                    {
+                        label: 'Reciclado (Otros Usos)',
+                        data: [9.7],
+                        backgroundColor: '#EB6841',
+                    },
+                    {
+                        label: 'Reciclado (Nuevos Envases)',
+                        data: [12.2],
+                        backgroundColor: '#00A0B0',
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%'
+                            }
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                         display: false
+                    }
+                },
+                plugins: {
+                    ...tooltipTitleCallback.plugins,
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: false
+                    },
+                    tooltip: {
+                         callbacks: {
+                            ...tooltipTitleCallback.plugins.tooltip.callbacks,
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.x !== null) {
+                                    label += context.parsed.x + '%';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gemini API Feature
+        const generateBtn = document.getElementById('generateBtn');
+        const plasticInput = document.getElementById('plasticInput');
+        const loading = document.getElementById('loading');
+        const resultContainer = document.getElementById('resultContainer');
+        const plasticName = document.getElementById('plasticName');
+        const resultText = document.getElementById('resultText');
+        const ttsBtn = document.getElementById('ttsBtn');
+
+        // Helper functions for TTS
+        const base64ToArrayBuffer = (base64) => {
+            const binaryString = window.atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        };
+
+        const pcmToWav = (pcm, sampleRate) => {
+            const numSamples = pcm.length;
+            const buffer = new ArrayBuffer(44 + numSamples * 2);
+            const view = new DataView(buffer);
+            let offset = 0;
+
+            const writeString = (str) => {
+                for (let i = 0; i < str.length; i++) {
+                    view.setUint8(offset + i, str.charCodeAt(i));
+                }
+                offset += str.length;
+            };
+
+            writeString('RIFF');
+            view.setUint32(offset, 36 + numSamples * 2, true); offset += 4;
+            writeString('WAVE');
+            writeString('fmt ');
+            view.setUint32(offset, 16, true); offset += 4;
+            view.setUint16(offset, 1, true); offset += 2;
+            view.setUint16(offset, 1, true); offset += 2;
+            view.setUint32(offset, sampleRate, true); offset += 4;
+            view.setUint32(offset, sampleRate * 2, true); offset += 4;
+            view.setUint16(offset, 2, true); offset += 2;
+            view.setUint16(offset, 16, true); offset += 2;
+            writeString('data');
+            view.setUint32(offset, numSamples * 2, true); offset += 4;
+
+            for (let i = 0; i < numSamples; i++) {
+                view.setInt16(offset, pcm[i], true);
+                offset += 2;
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        };
+
+        const playAudio = async (text) => {
+            ttsBtn.disabled = true;
+            try {
+                const payload = {
+                    contents: [{
+                        parts: [{ text: text }]
+                    }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: { voiceName: "Algieba" }
+                            }
+                        }
+                    },
+                    model: "gemini-2.5-flash-preview-tts"
+                };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType;
+
+                if (audioData && mimeType && mimeType.startsWith("audio/")) {
+                    const sampleRate = parseInt(mimeType.match(/rate=(\d+)/)[1], 10);
+                    const pcmData = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmData);
+                    const wavBlob = pcmToWav(pcm16, sampleRate);
+                    const audioUrl = URL.createObjectURL(wavBlob);
+                    const audio = new Audio(audioUrl);
+                    audio.play();
+                } else {
+                    console.error("Error: No audio data received.");
+                }
+            } catch (error) {
+                console.error("Failed to generate or play audio:", error);
+            } finally {
+                ttsBtn.disabled = false;
+            }
+        };
+
+        generateBtn.addEventListener('click', async () => {
+            const plasticType = plasticInput.value.trim();
+            if (!plasticType) {
+                alert("Por favor, ingresa un tipo de plástico.");
+                return;
+            }
+
+            generateBtn.disabled = true;
+            loading.classList.remove('hidden');
+            loading.classList.add('flex');
+            resultContainer.classList.add('hidden');
+            resultText.textContent = '';
+            ttsBtn.disabled = true;
+
+            const prompt = `Actúa como un experto en reciclaje. Proporciona una explicación concisa y detallada sobre el proceso de reciclaje, los usos comunes y el impacto ambiental de un producto de plástico. El producto es: ${plasticType}. Responde en español.`;
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = {
+                contents: chatHistory
+            };
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                const text = result.candidates[0].content.parts[0].text;
+                
+                plasticName.textContent = plasticType;
+                resultText.textContent = text;
+                resultContainer.classList.remove('hidden');
+                ttsBtn.disabled = false;
+
+                ttsBtn.onclick = () => playAudio(text);
+
+            } catch (error) {
+                console.error("Error al obtener la respuesta de la API:", error);
+                resultText.textContent = "Lo siento, hubo un error al generar la información. Por favor, inténtalo de nuevo.";
+                resultContainer.classList.remove('hidden');
+            } finally {
+                generateBtn.disabled = false;
+                loading.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
